@@ -1,0 +1,28 @@
+# Environment variables and secrets
+.env
+.env.local
+.env.production
+
+# User credentials and profiles
+credentials/profile.json
+credentials/*.json
+
+# Generated packages and temp files
+generated/
+temp/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime and logs
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# System files
+Thumbs.db
+Desktop.ini
