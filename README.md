@@ -71,6 +71,11 @@ cp .env.example .env
 
 4. **Restart Claude Desktop**
 
+5. **Run Tests:**
+```bash
+npm test
+```
+
 ## 🎯 Usage
 
 ### Generate Automation for Any Website
