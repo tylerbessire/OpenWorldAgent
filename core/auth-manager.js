@@ -62,7 +62,6 @@ export class AuthManager {
     return this.profile;
   }
 
-  // ... rest of methods remain the same but with cleaned comments
   async analyzeAndHandle(page, url) {
     await this.initializeProfile();
     

@@ -21,11 +21,25 @@ export class InterfaceMapper {
   async mapElements(page) {
     try {
       const elementMap = await page.evaluate(() => {
+        const generateOptimalSelector = (el) => {
+          if (el.id) return `#${el.id}`;
+          if (el.className) {
+            const cls = el.className.trim().split(/\s+/).join('.');
+            return `${el.tagName.toLowerCase()}.${cls}`;
+          }
+          return el.tagName.toLowerCase();
+        };
+
+        const mapForms = () => Array.from(document.forms).length;
+
+        const mapNavigation = () => Array.from(document.querySelectorAll('a[href]')).map(a => a.href);
+
+        const identifyPrimaryActions = (els) => els.filter(e => e.isClickable).slice(0, 5).map(e => e.text);
+
         const elements = [];
-        const elementId = (element, index) => 
+        const elementId = (element, index) =>
           element.id || element.className.split(' ')[0] || `element_${index}`;
 
-        // Get all interactive elements
         const interactiveElements = document.querySelectorAll([
           'button', 'input', 'textarea', 'select', 'a[href]',
           '[role="button"]', '[onclick]', '[tabindex]'
@@ -34,7 +48,7 @@ export class InterfaceMapper {
         interactiveElements.forEach((element, index) => {
           const rect = element.getBoundingClientRect();
           if (rect.width > 0 && rect.height > 0) {
-            elements.push({
+            const elData = {
               id: elementId(element, index),
               tag: element.tagName.toLowerCase(),
               type: element.type || 'unknown',
@@ -42,7 +56,6 @@ export class InterfaceMapper {
               placeholder: element.placeholder || '',
               value: element.value || '',
               href: element.href || '',
-              selector: this.generateOptimalSelector(element),
               rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
               attributes: {
                 id: element.id,
@@ -54,18 +67,20 @@ export class InterfaceMapper {
               },
               parent: element.parentElement?.tagName?.toLowerCase(),
               isVisible: !element.hidden && rect.width > 0 && rect.height > 0,
-              isClickable: ['button', 'a'].includes(element.tagName.toLowerCase()) || 
+              isClickable: ['button', 'a'].includes(element.tagName.toLowerCase()) ||
                           element.onclick || element.getAttribute('role') === 'button'
-            });
+            };
+            elData.selector = generateOptimalSelector(element);
+            elements.push(elData);
           }
         });
 
         return {
           elements,
           totalElements: elements.length,
-          forms: this.mapForms(),
-          navigation: this.mapNavigation(),
-          primaryActions: this.identifyPrimaryActions(elements)
+          forms: mapForms(),
+          navigation: mapNavigation(),
+          primaryActions: identifyPrimaryActions(elements)
         };
       });
 
